@@ -1,30 +1,30 @@
 import os
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from models import db, Project, Client
 
 # Generate Flask instance
 app = Flask(__name__)
 
-# Load settings from config.py
+# Set deployment context from environment variable
 app.config.from_object(os.environ['APP_SETTINGS'])
 
 # Create SQLAlchemy instance
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+db.init_app(app)
 
-import models
 
 @app.route('/projects/new', methods=['POST'])
 def new_project():
     return "foobar"
 
 
-@app.route('/projects', methods=['POST'])
+@app.route('/projects', methods=['GET'])
 def get_project():
-    return "foobar"
+    projects = Project.query.all()
+    return jsonify(projects), 200
 
 
-@app.route('/projects/delete', methods=['DELETE']
+@app.route('/projects/delete', methods=['DELETE'])
 def delete_project():
     return "foobar"
 
