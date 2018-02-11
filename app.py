@@ -36,27 +36,90 @@ def update_project():
 
 @app.route('/clients', methods=['GET'])
 def get_all_clients():
-    return "foobar"
+    """ return a list of all clients """
+    clients = Client.query.all()
+    results = [ { "first name": c.first_name,
+                  "last_name" : c.last_name,
+                  "email" : c.email,
+                  "phone" : c.phone,
+                  "id" : c.id,
+                } for c in clients
+              ]
+
+    return jsonify(results), 200
 
 
 @app.route('/clients/<int:client_id>', methods=['GET'])
-def get_client():
-    return "foobar"
+def get_client(client_id):
+    """ return a client by ID """
+    client = Client.query.filter(Client.id==client_id).one_or_none()
+    
+    if client:
+        result = { "first_name" : client.first_name,
+                   "last_name" : client.last_name,
+                   "email" : client.email,
+                   "phone" : client.phone
+                 }
+        return jsonify(result), 200
+    return jsonify({'msg': 'no such user'}), 400
+
+
+@app.route('/clients/<int:client_id>/projects', methods=['GET'])
+def get_client_projects(client_id):
+    """ return all projects belonging to client """
+    projects = Project.query.filter(Project.client_id==client_id).all()
+    if projects:
+        result = [ {"project_title": p.project_title,
+                    "due_date": p.due_date,
+                    "status": p.status
+                   } for p in projects
+                 ]
+        return jsonify(result), 200
+    return jsonify([]), 200
 
 
 @app.route('/clients/new', methods=['POST'])
 def new_client():
-    return "foobar"
+    """ Add a client to a database """
+    first_name = request.get_json()['first_name']
+    last_name = request.get_json()['last_name']
+    email = request.get_json()['email']
+    phone = request.get_json()['phone']
+    
+    client = Client(first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    phone=phone)
+    db.session.add(client)
+    db.session.commit()
+
+    return jsonify({'msg': 'User Added'}), 200
 
 
 @app.route('/clients/<int:client_id>/delete', methods=['DELETE'])
-def delete_client():
-    return "foobar"
+def delete_client(client_id):
+    """ Remove a client from the database """
+    client = Client.query.filter(Client.id==client_id).one_or_none()
+    if client:
+        db.session.delete(client)
+        db.session.commit()
+        return jsonify({'msg': 'User deleted'}), 200
+    return jsonify({'msg': 'No Such User'}), 400
 
 
 @app.route('/clients/<int:client_id>/update', methods=['POST'])
-def update_client():
-    return "foobar"
+def update_client(client_id):
+    """ Update a client's details """
+    client = Client.query.filter(Client.id==client_id).one_or_none()
+    
+    if client:
+        client.first_name = request.get_json()['first_name']
+        client.last_name = request.get_json()['last_name']
+        client.email = request.get_json()['email']
+        client.phone = request.get_json()['phone']
+        db.session.commit()
+        return jsonify({'msg': 'User updated'}), 200
+    return jsonify({'msg': 'no such user'}), 400
 
 
 if __name__ == '__main__':

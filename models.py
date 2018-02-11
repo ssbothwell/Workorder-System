@@ -30,9 +30,8 @@ class pedestal(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, pedestal, project_id, width,
+    def __init__(self, project_id, width,
                  height, depth, price, notes):
-        self.pedestal_id = pedestal_id
         self.project_id = project_id
         self.width = width
         self.height = height
@@ -51,9 +50,8 @@ class panel(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, panel_id, project_id, width,
+    def __init__(self, project_id, width,
                  height, thickness, price, notes):
-        self.panel_id = panel_id
         self.project_id = project_id
         self.width = width
         self.height = height
@@ -72,9 +70,8 @@ class strainer_bar(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, strainer_id, project_id, width,
+    def __init__(self, project_id, width,
                  height, thickness, price, notes):
-        self.strainer_id = strainer_id
         self.project_id = project_id
         self.width = width
         self.height = height
@@ -96,7 +93,7 @@ class Project(db.Model):
     deposit = db.Column(db.Numeric, default=0)
     discount = db.Column(db.Numeric, default=0.0)
 
-    def __init__(self, project_id, client_id, create_date,
+    def __init__(self, client_id, create_date,
                  due_date, completion_date, project_title,
                  status, deposit, discount):
         self.client_id = client_id
@@ -111,15 +108,14 @@ class Project(db.Model):
 
 class Client(db.Model):
     __tablename__ = 'clients'
-    client_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     first_name = db.Column(db.String(), nullable=True)
     last_name = db.Column(db.String(), nullable=False)
     email = db.Column(db.String(), nullable=False)
     phone = db.Column(db.String(), nullable=True)
 
-    def __init__(self, client_id, first_name,
-                 email, phone):
-        self.client_id = client_id
+    def __init__(self, first_name,
+                 last_name, email, phone):
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
