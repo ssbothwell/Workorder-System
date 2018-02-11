@@ -22,7 +22,7 @@ class custom_project(db.Model):
 
 class pedestal(db.Model):
     __tablename__ = 'pedestals'
-    pedestal_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
@@ -42,7 +42,7 @@ class pedestal(db.Model):
 
 class panel(db.Model):
     __tablename__ = 'panels'
-    panel_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
@@ -62,7 +62,7 @@ class panel(db.Model):
 
 class strainer_bar(db.Model):
     __tablename__ = 'strainer_bars'
-    strainer_id = db.Column(db.Integer, primary_key=True)
+    iner_id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, nullable=False)
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
@@ -83,8 +83,8 @@ class strainer_bar(db.Model):
 class Project(db.Model):
     __tablename__ = 'projects'
 
-    project_id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     create_date = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     due_date = db.Column(db.DateTime(timezone=True))
     completion_date = db.Column(db.DateTime(timezone=True))
@@ -92,6 +92,7 @@ class Project(db.Model):
     status = db.Column(db.Integer, default=0)
     deposit = db.Column(db.Numeric, default=0)
     discount = db.Column(db.Numeric, default=0.0)
+
 
     def __init__(self, client_id, create_date,
                  due_date, completion_date, project_title,
@@ -113,6 +114,7 @@ class Client(db.Model):
     last_name = db.Column(db.String(), nullable=False)
     email = db.Column(db.String(), nullable=False)
     phone = db.Column(db.String(), nullable=True)
+    projects = db.relationship("Project") 
 
     def __init__(self, first_name,
                  last_name, email, phone):
@@ -125,12 +127,11 @@ class Client(db.Model):
 class User(db.Model):
     __tablename__ = 'users'
 
-    user_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(), nullable=False)
     password = db.Column(db.String(), nullable=False)
 
-    def __init__(self, user_id, username, password):
-        self.user_id = user_id
+    def __init__(self, username, password):
         self.username = username
         self.password = password
 

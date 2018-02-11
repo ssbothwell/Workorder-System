@@ -19,7 +19,8 @@ def new_project():
 
 
 @app.route('/projects', methods=['GET'])
-def get_project():
+def get_all_projects():
+    """ return a lits of all projects """
     projects = Project.query.all()
     return jsonify(projects), 200
 
@@ -67,12 +68,13 @@ def get_client(client_id):
 @app.route('/clients/<int:client_id>/projects', methods=['GET'])
 def get_client_projects(client_id):
     """ return all projects belonging to client """
-    projects = Project.query.filter(Project.client_id==client_id).all()
-    if projects:
+    client = Client.query.filter(Client.id==client_id).one_or_none()
+
+    if client:
         result = [ {"project_title": p.project_title,
                     "due_date": p.due_date,
                     "status": p.status
-                   } for p in projects
+                   } for p in client.projects
                  ]
         return jsonify(result), 200
     return jsonify([]), 200
