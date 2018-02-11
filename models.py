@@ -6,84 +6,84 @@ from flask_sqlalchemy import SQLAlchemy
 # SQLAlchemy Instance
 db = SQLAlchemy()
 
-class custom_project(db.Model):
+class Custom_Project(db.Model):
     __tablename__ = 'custom_projects'
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, id, project_id, price, notes):
-        self.id = id
-        self.project_id = project_id
-        self.price = price
-        self.notes = notes
+    #def __init__(self, id, project_id, price, notes):
+    #    self.id = id
+    #    self.project_id = project_id
+    #    self.price = price
+    #    self.notes = notes
 
 
-class pedestal(db.Model):
+class Pedestal(db.Model):
     __tablename__ = 'pedestals'
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
     depth = db.Column(db.Numeric, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, project_id, width,
-                 height, depth, price, notes):
-        self.project_id = project_id
-        self.width = width
-        self.height = height
-        self.thickness = thickness
-        self.price = price
-        self.notes = notes
+    #def __init__(self, project_id, width,
+    #             height, depth, price, notes):
+    #    self.project_id = project_id
+    #    self.width = width
+    #    self.height = height
+    #    self.thickness = thickness
+    #    self.price = price
+    #    self.notes = notes
 
 
-class panel(db.Model):
+class Panel(db.Model):
     __tablename__ = 'panels'
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
     thickness = db.Column(db.Numeric, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, project_id, width,
-                 height, thickness, price, notes):
-        self.project_id = project_id
-        self.width = width
-        self.height = height
-        self.thickness = thickness
-        self.price = price
-        self.notes = notes
+    #def __init__(self, project_id, width,
+    #             height, thickness, price, notes):
+    #    self.project_id = project_id
+    #    self.width = width
+    #    self.height = height
+    #    self.thickness = thickness
+    #    self.price = price
+    #    self.notes = notes
 
 
-class strainer_bar(db.Model):
+class Strainer_Bar(db.Model):
     __tablename__ = 'strainer_bars'
-    iner_id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
     thickness = db.Column(db.Numeric, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
-    def __init__(self, project_id, width,
-                 height, thickness, price, notes):
-        self.project_id = project_id
-        self.width = width
-        self.height = height
-        self.thickness = thickness
-        self.price = price
-        self.notes = notes
+    #def __init__(self, project_id, width,
+    #             height, thickness, price, notes):
+    #    self.project_id = project_id
+    #    self.width = width
+    #    self.height = height
+    #    self.thickness = thickness
+    #    self.price = price
+    #    self.notes = notes
 
 
 class Project(db.Model):
     __tablename__ = 'projects'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     create_date = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     due_date = db.Column(db.DateTime(timezone=True))
@@ -92,6 +92,11 @@ class Project(db.Model):
     status = db.Column(db.Integer, default=0)
     deposit = db.Column(db.Numeric, default=0)
     discount = db.Column(db.Numeric, default=0.0)
+    
+    strainer_bars = db.relationship('Strainer_Bar') 
+    panels = db.relationship('Panel') 
+    pedestals = db.relationship('Pedestal') 
+    custom_projects = db.relationship('Custom_Project')
 
 
     def __init__(self, client_id, create_date,
