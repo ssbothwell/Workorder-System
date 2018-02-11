@@ -1,6 +1,12 @@
+"""
+Fabco Work Order System Controllers
+Solomon Bothwell
+ssbothwell@gmail.com
+"""
 import os
 from flask import Flask, request, jsonify
-from models import db, Project, Client
+from models import (db, Project, Client, Strainer_Bar,
+                    Panel, Pedestal, Custom_Project)
 
 # Generate Flask instance
 app = Flask(__name__)
@@ -44,52 +50,52 @@ def new_project():
 def get_all_projects():
     """ return a list of all projects """
     projects = Project.query.all()
-    
-    result = [ { "id": project.id,
-               "client_id": project.client_id,
-               "create_date": project.create_date,
-               "due_date": project.due_date,
-               "completion_date": project.completion_date,
-               "project_title": project.project_title,
-               "status": project.status,
-               "deposit": project.deposit,
-               "discount": project.discount,
-               "line_items": (project.strainer_bars +
-                              project.panels +
-                              project.pedestals +
-                              project.custom_projects)
-             } for project in projects ]
-    return jsonify(projects), 200
+
+    results = [{"id": project.id,
+                "client_id": project.client_id,
+                "create_date": project.create_date,
+                "due_date": project.due_date,
+                "completion_date": project.completion_date,
+                "project_title": project.project_title,
+                "status": project.status,
+                "deposit": project.deposit,
+                "discount": project.discount,
+                "line_items": (project.strainer_bars +
+                               project.panels +
+                               project.pedestals +
+                               project.custom_projects)
+               } for project in projects]
+    return jsonify(results), 200
 
 
 @app.route('/projects/<int:project_id>', methods=['GET'])
 def get_project(project_id):
     """ return a single project by id """
-    project = Project.query.filter(Project.id==project_id).one_or_none()
-    
+    project = Project.query.filter(Project.id == project_id).one_or_none()
+
     if project:
-        result = { "id": project.id,
-                   "client_id": project.client_id,
-                   "create_date": project.create_date,
-                   "due_date": project.due_date,
-                   "completion_date": project.completion_date,
-                   "project_title": project.project_title,
-                   "status": project.status,
-                   "deposit": project.deposit,
-                   "discount": project.discount,
-                   "line_items": (project.strainer_bars +
-                                  project.panels +
-                                  project.pedestals +
-                                  project.custom_projects)
+        result = {"id": project.id,
+                  "client_id": project.client_id,
+                  "create_date": project.create_date,
+                  "due_date": project.due_date,
+                  "completion_date": project.completion_date,
+                  "project_title": project.project_title,
+                  "status": project.status,
+                  "deposit": project.deposit,
+                  "discount": project.discount,
+                  "line_items": (project.strainer_bars +
+                                 project.panels +
+                                 project.pedestals +
+                                 project.custom_projects)
                  }
         return jsonify(result), 200
     return jsonify({'msg': 'No Such Project'}), 400
 
 
-@app.route('/projects/delete', methods=['DELETE'])
-def delete_project():
+@app.route('/projects/<int:project_id>/delete', methods=['DELETE'])
+def delete_project(project_id):
     """ Remove a project from the database """
-    project = Project.query.filter(Project.id==project_id).one_or_none()
+    project = Project.query.filter(Project.id == project_id).one_or_none()
     if project:
         db.session.delete(project)
         db.session.commit()
@@ -99,7 +105,8 @@ def delete_project():
 
 @app.route('/projects/<int:project_id>/update', methods=['POST'])
 def update_project(project_id):
-    project = Project.query.filter(Project.id==project_id).one_or_none()
+    """ Updates all fields on a project with request """
+    project = Project.query.filter(Project.id == project_id).one_or_none()
 
     if project:
         project.client_id = request.get_json()['client_id']
@@ -120,12 +127,12 @@ def update_project(project_id):
 def get_all_clients():
     """ return a list of all clients """
     clients = Client.query.all()
-    results = [ { "first name": c.first_name,
-                  "last_name" : c.last_name,
-                  "email" : c.email,
-                  "phone" : c.phone,
-                  "id" : c.id,
-                } for c in clients
+    results = [{"first name": c.first_name,
+                "last_name" : c.last_name,
+                "email" : c.email,
+                "phone" : c.phone,
+                "id" : c.id,
+               } for c in clients
               ]
 
     return jsonify(results), 200
@@ -134,13 +141,13 @@ def get_all_clients():
 @app.route('/clients/<int:client_id>', methods=['GET'])
 def get_client(client_id):
     """ return a client by ID """
-    client = Client.query.filter(Client.id==client_id).one_or_none()
-    
+    client = Client.query.filter(Client.id == client_id).one_or_none()
+
     if client:
-        result = { "first_name" : client.first_name,
-                   "last_name" : client.last_name,
-                   "email" : client.email,
-                   "phone" : client.phone
+        result = {"first_name" : client.first_name,
+                  "last_name" : client.last_name,
+                  "email" : client.email,
+                  "phone" : client.phone
                  }
         return jsonify(result), 200
     return jsonify({'msg': 'no such user'}), 400
@@ -149,13 +156,13 @@ def get_client(client_id):
 @app.route('/clients/<int:client_id>/projects', methods=['GET'])
 def get_client_projects(client_id):
     """ return all projects belonging to client """
-    client = Client.query.filter(Client.id==client_id).one_or_none()
+    client = Client.query.filter(Client.id == client_id).one_or_none()
 
     if client:
-        result = [ {"project_title": p.project_title,
-                    "due_date": p.due_date,
-                    "status": p.status
-                   } for p in client.projects
+        result = [{"project_title": p.project_title,
+                   "due_date": p.due_date,
+                   "status": p.status
+                  } for p in client.projects
                  ]
         return jsonify(result), 200
     return jsonify({'msg': 'No Such User'}), 400
@@ -168,7 +175,7 @@ def new_client():
     last_name = request.get_json()['last_name']
     email = request.get_json()['email']
     phone = request.get_json()['phone']
-    
+
     client = Client(first_name=first_name,
                     last_name=last_name,
                     email=email,
@@ -182,7 +189,7 @@ def new_client():
 @app.route('/clients/<int:client_id>/delete', methods=['DELETE'])
 def delete_client(client_id):
     """ Remove a client from the database """
-    client = Client.query.filter(Client.id==client_id).one_or_none()
+    client = Client.query.filter(Client.id == client_id).one_or_none()
     if client:
         db.session.delete(client)
         db.session.commit()
@@ -193,8 +200,8 @@ def delete_client(client_id):
 @app.route('/clients/<int:client_id>/update', methods=['POST'])
 def update_client(client_id):
     """ Update a client's details """
-    client = Client.query.filter(Client.id==client_id).one_or_none()
-    
+    client = Client.query.filter(Client.id == client_id).one_or_none()
+
     if client:
         client.first_name = request.get_json()['first_name']
         client.last_name = request.get_json()['last_name']
@@ -207,10 +214,10 @@ def update_client(client_id):
 
 def delete_all_lineitems(project) -> None:
     """ Delete all project line items """
-    strainers = Strainer_Bar.query.filter(Strainer_Bar.project_id==project.id).all()
-    panels = Panel.query.filter(Panel.project_id==project.id).all()
-    pedestals = Pedestals.query.filter(Pedestals.project_id==project.id).all()
-    custom_projects = Custom_Project.query.filter(Custom_Project.project_id==project.id).all()
+    strainers = Strainer_Bar.query.filter(Strainer_Bar.project_id == project.id).all()
+    panels = Panel.query.filter(Panel.project_id == project.id).all()
+    pedestals = Pedestal.query.filter(Pedestal.project_id == project.id).all()
+    custom_projects = Custom_Project.query.filter(Custom_Project.project_id == project.id).all()
 
     for item in strainers + panels + pedestals + custom_projects:
         db.session.delete(item)
@@ -223,39 +230,39 @@ def update_lineitems(project) -> None:
 
     for s in request.get_json()['strainer_bars']:
         Strainer_Bar(
-        project_id=project.id
-        width=s['width'],
-        height=s['height'],
-        thickness=s['thickness'],
-        price=s['price'],
-        notes=s['notes'])
+            project_id=project.id,
+            width=s['width'],
+            height=s['height'],
+            thickness=s['thickness'],
+            price=s['price'],
+            notes=s['notes'])
         db.session.add(s)
 
     for p in request.get_json()['panels']:
         Panel(
-        project_id=project.id
-        width=p['width'],
-        height=p['height'],
-        thickness=p['thickness'],
-        price=p['price'],
-        notes=p['notes'])
+            project_id=project.id,
+            width=p['width'],
+            height=p['height'],
+            thickness=p['thickness'],
+            price=p['price'],
+            notes=p['notes'])
         db.session.add(p)
 
     for p in request.get_json()['pedestals']:
         Pedestal(
-        project_id=project.id
-        width=p['width'],
-        height=p['height'],
-        depth=p['depth'],
-        price=p['price'],
-        notes=p['notes'])
+            project_id=project.id,
+            width=p['width'],
+            height=p['height'],
+            depth=p['depth'],
+            price=p['price'],
+            notes=p['notes'])
         db.session.add(p)
 
     for p in request.get_json()['custom_project']:
         Custom_Project(
-        project_id=project.id
-        price=p['price'],
-        notes=p['notes'])
+            project_id=project.id,
+            price=p['price'],
+            notes=p['notes'])
         db.session.add(p)
 
     return
