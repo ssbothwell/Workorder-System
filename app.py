@@ -7,6 +7,7 @@ import os
 from flask import Flask, request, jsonify
 from models import (db, Project, Client, Strainer_Bar,
                     Panel, Pedestal, Custom_Project)
+from validators import client_schema, project_schema
 
 # Generate Flask instance
 app = Flask(__name__)
@@ -22,14 +23,19 @@ db.init_app(app)
 @app.route('/projects/new', methods=['POST'])
 def new_project():
     """ Add a project to a database """
-    client_id = request.get_json()['client_id']
-    create_date = request.get_json()['create_date']
-    due_date = request.get_json()['due_date']
-    completion_date = request.get_json()['completion_date']
-    project_title = request.get_json()['project_title']
-    status = request.get_json()['status']
-    deposit = request.get_json()['deposit']
-    discount = request.get_json()['discount']
+    try:
+        validated = project_schema.validate(request.get_json())
+    except:
+        return jsonify({'msg': 'Bad JSON Request'}), 400
+
+    client_id = validated['client_id']
+    create_date = validated['create_date']
+    due_date = validated['due_date']
+    completion_date = validated['completion_date']
+    project_title = validated['project_title']
+    status = validated['status']
+    deposit = validated['deposit']
+    discount = validated['discount']
 
     project = Project(client_id=client_id,
                       create_date=create_date,
@@ -108,20 +114,26 @@ def update_project(project_id):
     """ Updates all fields on a project with request """
     project = Project.query.filter(Project.id == project_id).one_or_none()
 
+    try:
+        validated = project_schema.validate(request.get_json())
+    except:
+        return jsonify({'msg': 'Bad JSON Request'}), 400
+
     if project:
-        project.client_id = request.get_json()['client_id']
-        project.create_date = request.get_json()['create_date']
-        project.due_date = request.get_json()['due_date']
-        project.completion_date = request.get_json()['completion_date']
-        project.project_title = request.get_json()['project_title']
-        project.status = request.get_json()['status']
-        project.deposit = request.get_json()['deposit']
-        project.discount = request.get_json()['discount']
+        client_id = validated['client_id']
+        create_date = validated['create_date']
+        due_date = validated['due_date']
+        completion_date = validated['completion_date']
+        project_title = validated['project_title']
+        status = validated['status']
+        deposit = validated['deposit']
+        discount = validated['discount']
         update_lineitems(project)
 
         db.session.commit()
         return jsonify({'msg': 'Project Updated'}), 200
     return jsonify({'msg': 'No Such Project'}), 400
+
 
 @app.route('/clients', methods=['GET'])
 def get_all_clients():
@@ -171,10 +183,15 @@ def get_client_projects(client_id):
 @app.route('/clients/new', methods=['POST'])
 def new_client():
     """ Add a client to a database """
-    first_name = request.get_json()['first_name']
-    last_name = request.get_json()['last_name']
-    email = request.get_json()['email']
-    phone = request.get_json()['phone']
+    try:
+        validated = client_schema.validate(request.get_json())
+    except:
+        return jsonify({'msg': 'Bad JSON Request'}), 400
+
+    first_name = validated['first_name']
+    last_name = validated['last_name']
+    email = validated['email']
+    phone = validated['phone']
 
     client = Client(first_name=first_name,
                     last_name=last_name,
@@ -200,13 +217,18 @@ def delete_client(client_id):
 @app.route('/clients/<int:client_id>/update', methods=['POST'])
 def update_client(client_id):
     """ Update a client's details """
+    try:
+        validated = client_schema.validate(request.get_json())
+    except:
+        return jsonify({'msg': 'Bad JSON Request'}), 400
+
     client = Client.query.filter(Client.id == client_id).one_or_none()
 
     if client:
-        client.first_name = request.get_json()['first_name']
-        client.last_name = request.get_json()['last_name']
-        client.email = request.get_json()['email']
-        client.phone = request.get_json()['phone']
+        client.first_name = validated['first_name']
+        client.last_name = validated['last_name']
+        client.email = validated['email']
+        client.phone = validated['phone']
         db.session.commit()
         return jsonify({'msg': 'User Updated'}), 200
     return jsonify({'msg': 'No Such User'}), 400
