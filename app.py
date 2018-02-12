@@ -25,8 +25,8 @@ def new_project():
     """ Add a project to a database """
     try:
         validated = project_schema.validate(request.get_json())
-    except:
-        return jsonify({'msg': 'Bad JSON Request'}), 400
+    except KeyError:
+        return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
     client_id = validated['client_id']
     create_date = validated['create_date']
@@ -116,18 +116,18 @@ def update_project(project_id):
 
     try:
         validated = project_schema.validate(request.get_json())
-    except:
-        return jsonify({'msg': 'Bad JSON Request'}), 400
+    except KeyError:
+        return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
     if project:
-        client_id = validated['client_id']
-        create_date = validated['create_date']
-        due_date = validated['due_date']
-        completion_date = validated['completion_date']
-        project_title = validated['project_title']
-        status = validated['status']
-        deposit = validated['deposit']
-        discount = validated['discount']
+        project.client_id = validated['client_id']
+        project.create_date = validated['create_date']
+        project.due_date = validated['due_date']
+        project.completion_date = validated['completion_date']
+        project.project_title = validated['project_title']
+        project.status = validated['status']
+        project.deposit = validated['deposit']
+        project.discount = validated['discount']
         update_lineitems(project)
 
         db.session.commit()
@@ -185,8 +185,8 @@ def new_client():
     """ Add a client to a database """
     try:
         validated = client_schema.validate(request.get_json())
-    except:
-        return jsonify({'msg': 'Bad JSON Request'}), 400
+    except KeyError:
+        return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
     first_name = validated['first_name']
     last_name = validated['last_name']
@@ -219,8 +219,8 @@ def update_client(client_id):
     """ Update a client's details """
     try:
         validated = client_schema.validate(request.get_json())
-    except:
-        return jsonify({'msg': 'Bad JSON Request'}), 400
+    except KeyError:
+        return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
     client = Client.query.filter(Client.id == client_id).one_or_none()
 
@@ -257,6 +257,8 @@ def update_lineitems(project) -> None:
             height=s['height'],
             thickness=s['thickness'],
             price=s['price'],
+            quantity=s['quantity'],
+            total=s['total'],
             notes=s['notes'])
         db.session.add(s)
 
@@ -267,6 +269,8 @@ def update_lineitems(project) -> None:
             height=p['height'],
             thickness=p['thickness'],
             price=p['price'],
+            quantity=p['quantity'],
+            total=p['total'],
             notes=p['notes'])
         db.session.add(p)
 
@@ -277,6 +281,8 @@ def update_lineitems(project) -> None:
             height=p['height'],
             depth=p['depth'],
             price=p['price'],
+            quantity=p['quantity'],
+            total=p['total'],
             notes=p['notes'])
         db.session.add(p)
 
@@ -284,6 +290,8 @@ def update_lineitems(project) -> None:
         Custom_Project(
             project_id=project.id,
             price=p['price'],
+            quantity=p['quantity'],
+            total=p['total'],
             notes=p['notes'])
         db.session.add(p)
 

@@ -10,7 +10,9 @@ class Custom_Project(db.Model):
     __tablename__ = 'custom_projects'
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
+    total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
     #def __init__(self, id, project_id, price, notes):
@@ -27,7 +29,9 @@ class Pedestal(db.Model):
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
     depth = db.Column(db.Numeric, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
+    total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
     #def __init__(self, project_id, width,
@@ -47,7 +51,9 @@ class Panel(db.Model):
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
     thickness = db.Column(db.Numeric, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
+    total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
     #def __init__(self, project_id, width,
@@ -67,7 +73,9 @@ class Strainer_Bar(db.Model):
     width = db.Column(db.Numeric, nullable=False)
     height = db.Column(db.Numeric, nullable=False)
     thickness = db.Column(db.Numeric, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
+    total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
 
     #def __init__(self, project_id, width,

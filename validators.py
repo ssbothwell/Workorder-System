@@ -1,8 +1,7 @@
 """
 Validation Helpers
 """
-from schema import Schema, And, Use, Optional
-import json
+from schema import Schema, And
 
 # JSON Request schemas
 client_schema = Schema(And({'first_name': str,
@@ -12,34 +11,42 @@ client_schema = Schema(And({'first_name': str,
 
 
 strainer_schema = Schema(And({'project_id': int,
-                              'width': float,
-                              'height': float,
-                              'thickness': float,
+                              'width': int,
+                              'height': int,
+                              'thickness': int,
                               'price': int,
+                              'quantity': int,
+                              'total': int,
                               'notes': str
                              }))
 
 
 panel_schema = Schema(And({'project_id': int,
-                           'width': float,
-                           'height': float,
-                           'thickness': float,
+                           'width': int,
+                           'height': int,
+                           'thickness': int,
                            'price': int,
+                           'quantity': int,
+                           'total': int,
                            'notes': str
                           }))
 
 
 pedestal_schema = Schema(And({'project_id': int,
-                             'width': float,
-                             'height': float,
-                             'depth': float,
-                             'price': int,
-                             'notes': str
+                              'width': int,
+                              'height': int,
+                              'depth': int,
+                              'price': int,
+                              'quantity': int,
+                              'total': int,
+                              'notes': str
                              }))
 
 
 custom_project_schema = Schema(And({'project_id': int,
                                     'price': int,
+                                    'quantity': int,
+                                    'total': int,
                                     'notes': str
                                    }))
 
