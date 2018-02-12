@@ -4,6 +4,7 @@ Solomon Bothwell
 ssbothwell@gmail.com
 """
 import os
+from datetime import datetime
 from flask import Flask, request, jsonify
 from models import (db, Project, Client, Strainer_Bar,
                     Panel, Pedestal, Custom_Project)
@@ -28,8 +29,9 @@ def new_project():
     except KeyError:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
+    # Must ensure client_id is for a real client
     client_id = validated['client_id']
-    create_date = validated['create_date']
+    # Convert date strings to datetime objects
     due_date = validated['due_date']
     completion_date = validated['completion_date']
     project_title = validated['project_title']
@@ -38,9 +40,8 @@ def new_project():
     discount = validated['discount']
 
     project = Project(client_id=client_id,
-                      create_date=create_date,
-                      due_date=due_date,
-                      completion_date=completion_date,
+                      due_date=datetime.strptime(due_date, '%m-%d-%Y'),
+                      completion_date=datetime.strptime(completion_date, '%m-%d-%Y'), 
                       project_title=project_title,
                       status=status,
                       deposit=deposit,
@@ -64,8 +65,8 @@ def get_all_projects():
                 "completion_date": project.completion_date,
                 "project_title": project.project_title,
                 "status": project.status,
-                "deposit": project.deposit,
-                "discount": project.discount,
+                "deposit": str(project.deposit),
+                "discount": str(project.discount),
                 "line_items": (project.strainer_bars +
                                project.panels +
                                project.pedestals +
@@ -87,8 +88,8 @@ def get_project(project_id):
                   "completion_date": project.completion_date,
                   "project_title": project.project_title,
                   "status": project.status,
-                  "deposit": project.deposit,
-                  "discount": project.discount,
+                  "deposit": str(project.deposit),
+                  "discount": str(project.discount),
                   "line_items": (project.strainer_bars +
                                  project.panels +
                                  project.pedestals +
@@ -121,7 +122,6 @@ def update_project(project_id):
 
     if project:
         project.client_id = validated['client_id']
-        project.create_date = validated['create_date']
         project.due_date = validated['due_date']
         project.completion_date = validated['completion_date']
         project.project_title = validated['project_title']
@@ -286,7 +286,7 @@ def update_lineitems(project) -> None:
             notes=p['notes'])
         db.session.add(p)
 
-    for p in request.get_json()['custom_project']:
+    for p in request.get_json()['custom_projects']:
         Custom_Project(
             project_id=project.id,
             price=p['price'],

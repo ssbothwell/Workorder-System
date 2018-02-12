@@ -107,11 +107,10 @@ class Project(db.Model):
     custom_projects = db.relationship('Custom_Project')
 
 
-    def __init__(self, client_id, create_date,
-                 due_date, completion_date, project_title,
+    def __init__(self, client_id, due_date, 
+                 completion_date, project_title,
                  status, deposit, discount):
         self.client_id = client_id
-        self.create_date = create_date
         self.due_date = due_date
         self.completion_date = completion_date
         self.project_title = project_title
