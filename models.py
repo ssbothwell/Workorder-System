@@ -14,12 +14,19 @@ class Custom_Project(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
+    p_type = db.Column(db.String(), nullable=False)
 
-    #def __init__(self, id, project_id, price, notes):
-    #    self.id = id
-    #    self.project_id = project_id
-    #    self.price = price
-    #    self.notes = notes
+
+    def get_dict(self):
+        """ Returns columns as a dictionary """
+        return {"id": self.id,
+                "p_type": 'custom_project',
+                "project_id": self.project_id,
+                "quantity": self.quantity,
+                "price": str(self.price),
+                "total": str(self.total),
+                "notes": self.notes
+               }
 
 
 class Pedestal(db.Model):
@@ -33,15 +40,22 @@ class Pedestal(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
+    p_type = db.Column(db.String(), nullable=False)
 
-    #def __init__(self, project_id, width,
-    #             height, depth, price, notes):
-    #    self.project_id = project_id
-    #    self.width = width
-    #    self.height = height
-    #    self.thickness = thickness
-    #    self.price = price
-    #    self.notes = notes
+
+    def get_dict(self):
+        """ Returns columns as a dictionary """
+        return {"id": self.id,
+                "p_p_type": "pedestal",
+                "project_id": self.project_id,
+                "height": str(self.height),
+                "width": str(self.width),
+                "depth": str(self.depth),
+                "quantity": self.quantity,
+                "price": str(self.price),
+                "total": str(self.total),
+                "notes": self.notes
+               }
 
 
 class Panel(db.Model):
@@ -55,15 +69,22 @@ class Panel(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
+    p_type = db.Column(db.String(), nullable=False)
 
-    #def __init__(self, project_id, width,
-    #             height, thickness, price, notes):
-    #    self.project_id = project_id
-    #    self.width = width
-    #    self.height = height
-    #    self.thickness = thickness
-    #    self.price = price
-    #    self.notes = notes
+
+    def get_dict(self):
+        """ Returns columns as a dictionary """
+        return {"id": self.id,
+                "p_type": "panel",
+                "project_id": self.project_id,
+                "height": str(self.height),
+                "width": str(self.width),
+                "thickness": str(self.thickness),
+                "quantity": self.quantity,
+                "price": str(self.price),
+                "total": str(self.total),
+                "notes": self.notes
+               }
 
 
 class Strainer_Bar(db.Model):
@@ -77,15 +98,21 @@ class Strainer_Bar(db.Model):
     price = db.Column(db.Numeric, nullable=False)
     total = db.Column(db.Numeric, nullable=False)
     notes = db.Column(db.String(), nullable=True)
+    p_type = db.Column(db.String(), nullable=False)
 
-    #def __init__(self, project_id, width,
-    #             height, thickness, price, notes):
-    #    self.project_id = project_id
-    #    self.width = width
-    #    self.height = height
-    #    self.thickness = thickness
-    #    self.price = price
-    #    self.notes = notes
+    def get_dict(self):
+        """ Returns columns as a dictionary """
+        return {"id": self.id,
+                "p_type": "strainer_bar",
+                "project_id": self.project_id,
+                "height": str(self.height),
+                "width": str(self.width),
+                "thickness": str(self.thickness),
+                "quantity": self.quantity,
+                "price": str(self.price),
+                "total": str(self.total),
+                "notes": self.notes
+               }
 
 
 class Project(db.Model):
@@ -117,6 +144,31 @@ class Project(db.Model):
         self.status = status
         self.deposit = deposit
         self.discount = discount
+
+
+    def get_dict(self) -> dict:
+        """ Returns columns as a dictionary """
+        return {"id": self.id,
+                "client_id": self.client_id,
+                "create_date": self.create_date,
+                "due_date": self.due_date,
+                "completion_date": self.completion_date,
+                "self_title": self.project_title,
+                "status": self.status,
+                "deposit": str(self.deposit),
+                "discount": str(self.discount),
+                "line_items": self.get_lineitems()
+               }
+
+
+    def get_lineitems(self) -> dict:
+        """ returns a dictionary of all lineitems """
+        items = (self.strainer_bars +
+                 self.panels +
+                 self.pedestals +
+                 self.custom_projects)
+        return [item.get_dict() for item in items]
+        
 
 
 class Client(db.Model):

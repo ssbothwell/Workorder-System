@@ -25,53 +25,26 @@ db.init_app(app)
 def new_project():
     """ Add a project to a database """
     try:
-        validated = project_schema.validate(request.get_json())
+        p_dict = project_schema.validate(request.get_json())
+        p_dict = gen_datetimes(p_dict)
+        line_items = p_dict.pop('line_items', None)
     except KeyError:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
     # Must ensure client_id is for a real client
-    client_id = validated['client_id']
-    # Convert date strings to datetime objects
-    due_date = validated['due_date']
-    completion_date = validated['completion_date']
-    project_title = validated['project_title']
-    status = validated['status']
-    deposit = validated['deposit']
-    discount = validated['discount']
-
-    project = Project(client_id=client_id,
-                      due_date=datetime.strptime(due_date, '%m-%d-%Y'),
-                      completion_date=datetime.strptime(completion_date, '%m-%d-%Y'), 
-                      project_title=project_title,
-                      status=status,
-                      deposit=deposit,
-                      discount=discount)
+    project = Project(**p_dict)
     db.session.add(project)
-    update_lineitems(project)
+    create_lineitems(project, line_items)
     db.session.commit()
 
-    return jsonify({'msg': 'User Added'}), 200
+    return jsonify({'msg': 'Project Added'}), 200
 
 
 @app.route('/projects', methods=['GET'])
 def get_all_projects():
     """ return a list of all projects """
     projects = Project.query.all()
-
-    results = [{"id": project.id,
-                "client_id": project.client_id,
-                "create_date": project.create_date,
-                "due_date": project.due_date,
-                "completion_date": project.completion_date,
-                "project_title": project.project_title,
-                "status": project.status,
-                "deposit": str(project.deposit),
-                "discount": str(project.discount),
-                "line_items": (project.strainer_bars +
-                               project.panels +
-                               project.pedestals +
-                               project.custom_projects)
-               } for project in projects]
+    results = [p.get_dict() for p in projects]
     return jsonify(results), 200
 
 
@@ -79,23 +52,8 @@ def get_all_projects():
 def get_project(project_id):
     """ return a single project by id """
     project = Project.query.filter(Project.id == project_id).one_or_none()
-
     if project:
-        result = {"id": project.id,
-                  "client_id": project.client_id,
-                  "create_date": project.create_date,
-                  "due_date": project.due_date,
-                  "completion_date": project.completion_date,
-                  "project_title": project.project_title,
-                  "status": project.status,
-                  "deposit": str(project.deposit),
-                  "discount": str(project.discount),
-                  "line_items": (project.strainer_bars +
-                                 project.panels +
-                                 project.pedestals +
-                                 project.custom_projects)
-                 }
-        return jsonify(result), 200
+        return jsonify(project.get_dict()), 200
     return jsonify({'msg': 'No Such Project'}), 400
 
 
@@ -116,20 +74,20 @@ def update_project(project_id):
     project = Project.query.filter(Project.id == project_id).one_or_none()
 
     try:
-        validated = project_schema.validate(request.get_json())
+        p_dict = project_schema.validate(request.get_json())
+        line_items = validated.pop('line_items', None)
     except KeyError:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
     if project:
-        project.client_id = validated['client_id']
-        project.due_date = validated['due_date']
-        project.completion_date = validated['completion_date']
-        project.project_title = validated['project_title']
-        project.status = validated['status']
-        project.deposit = validated['deposit']
-        project.discount = validated['discount']
-        update_lineitems(project)
+        # Convert dates to datetime objects
+        p_dict['due_date'] = datetime.strptime(p_dict['due_date'], 
+                                               '%Y-%m-%d')
+        p_dict['completion_date'] = datetime.strptime(p_dict['completion_date'], '%Y-%m-%d'),
 
+        project = Project(**p_dict)
+        db.session.add(project)
+        create_lineitems(project, line_items)
         db.session.commit()
         return jsonify({'msg': 'Project Updated'}), 200
     return jsonify({'msg': 'No Such Project'}), 400
@@ -246,56 +204,68 @@ def delete_all_lineitems(project) -> None:
     return
 
 
-def update_lineitems(project) -> None:
-    """ Update lineitems from request """
+def create_lineitems(project, line_items) -> None:
+    """ Create lineitems from request dict """
     delete_all_lineitems(project)
 
-    for s in request.get_json()['strainer_bars']:
-        Strainer_Bar(
-            project_id=project.id,
-            width=s['width'],
-            height=s['height'],
-            thickness=s['thickness'],
-            price=s['price'],
-            quantity=s['quantity'],
-            total=s['total'],
-            notes=s['notes'])
-        db.session.add(s)
+    for item in line_items:
+        if item['p_type'] == 'strainer_bar':
+            model = Strainer_Bar(
+                project_id=project.id,
+                p_type=item['p_type'],
+                width=item['width'],
+                height=item['height'],
+                thickness=item['thickness'],
+                price=item['price'],
+                quantity=item['quantity'],
+                total=item['total'],
+                notes=item['notes'])
 
-    for p in request.get_json()['panels']:
-        Panel(
-            project_id=project.id,
-            width=p['width'],
-            height=p['height'],
-            thickness=p['thickness'],
-            price=p['price'],
-            quantity=p['quantity'],
-            total=p['total'],
-            notes=p['notes'])
-        db.session.add(p)
+        if item['p_type'] == 'panel':
+            model = Panel(
+                project_id=project.id,
+                p_type=item['p_type'],
+                width=item['width'],
+                height=item['height'],
+                thickness=item['thickness'],
+                price=item['price'],
+                quantity=item['quantity'],
+                total=item['total'],
+                notes=item['notes'])
 
-    for p in request.get_json()['pedestals']:
-        Pedestal(
-            project_id=project.id,
-            width=p['width'],
-            height=p['height'],
-            depth=p['depth'],
-            price=p['price'],
-            quantity=p['quantity'],
-            total=p['total'],
-            notes=p['notes'])
-        db.session.add(p)
+        if item['p_type'] == 'pedestal':
+            model = Pedestal(
+                project_id=project.id,
+                p_type=item['p_type'],
+                width=item['width'],
+                height=item['height'],
+                depth=item['depth'],
+                price=item['price'],
+                quantity=item['quantity'],
+                total=item['total'],
+                notes=item['notes'])
 
-    for p in request.get_json()['custom_projects']:
-        Custom_Project(
-            project_id=project.id,
-            price=p['price'],
-            quantity=p['quantity'],
-            total=p['total'],
-            notes=p['notes'])
-        db.session.add(p)
+        if item['p_type'] == 'custom_project':
+            item = Custom_Project(
+                project_id=project.id,
+                p_type=item['p_type'],
+                price=item['price'],
+                quantity=item['quantity'],
+                total=item['total'],
+                notes=item['notes'])
 
+        db.session.add(item)
     return
+
+
+def gen_datetimes(_dict: dict) -> dict:
+    """ replace date ISO8061 date strings with
+    datetime objects in a dict """
+    strptime = datetime.strptime
+    _dict['due_date'] = strptime(_dict['due_date'], '%Y-%m-%d')
+    _dict['completion_date'] = strptime(_dict['completion_date'], '%Y-%m-%d'),
+    return _dict
+
 
 if __name__ == '__main__':
     app.run()

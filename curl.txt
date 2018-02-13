@@ -1,0 +1,28 @@
+# Create a client
+
+curl -i -H "Content-Type: application/json" -X POST \
+-d '{"first_name": "Foo", "last_name": "Bar", "email": "foo@bar.com", "phone": "3238047839"}' http://localhost:5000/clients/new 
+
+# Delete a client
+
+curl -i -H "Content-Type: application/json" -X DELETE http://localhost:5000/clients/4/delete
+
+# Get all clients
+
+curl -i -H "Content-Type: application/json" -X GET http://localhost:5000/clients
+
+# Create a project
+
+ curl -i -H "Content-Type: application/json" -X POST -d '{"client_id": 5, "due_date": "2018-01-01", "completion_date": "2018-02-01", "project_title": "a test project", "status": 0, "deposit": 5000, "discount": 0, "line_items": [{"price": 100, "quantity":2, "total": 200, "p_type": "custom_project", "notes": ""}]}' http://localhost:5000/projects/ne
+
+
+# Get all projects
+
+curl -i -H "Content-Type: application/json" -X GET http://localhost:5000/projects
+
+
+# Create client
+
+curl -i -H "Content-Type: application/json" -X POST -d '{"first_name":
+"Foo", "last_name": "Bar", "email": "foo@bar.com", "phone":
+"3238047839"}' http://localhost:5000/clients/new
