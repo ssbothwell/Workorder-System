@@ -5,6 +5,7 @@ ssbothwell@gmail.com
 """
 import os
 from datetime import datetime
+from decimal import Decimal
 from flask import Flask, request, jsonify
 from models import (db, Project, Client, Strainer_Bar,
                     Panel, Pedestal, Custom_Project)
@@ -27,6 +28,7 @@ def new_project():
     try:
         p_dict = project_schema.validate(request.get_json())
         p_dict = gen_datetimes(p_dict)
+        p_dict = gen_total(p_dict)
         line_items = p_dict.pop('line_items', None)
     except:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
@@ -78,6 +80,8 @@ def update_project(project_id):
     """ Updates all fields on a project with request """
     try:
         p_dict = project_schema.validate(request.get_json())
+        p_dict = gen_total(p_dict)
+        p_dict = gen_datetimes(p_dict)
         line_items = validated.pop('line_items', None)
     except:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
@@ -90,10 +94,6 @@ def update_project(project_id):
     project = Project.query.filter(Project.id == 
                                    project_id).one_or_none()
     if project:
-        # Convert dates to datetime objects
-        p_dict['due_date'] = datetime.strptime(p_dict['due_date'], 
-                                               '%Y-%m-%d')
-        p_dict['completion_date'] = datetime.strptime(p_dict['completion_date'], '%Y-%m-%d'),
 
         project = Project(**p_dict)
         db.session.add(project)
@@ -274,6 +274,16 @@ def gen_datetimes(_dict: dict) -> dict:
     strptime = datetime.strptime
     _dict['due_date'] = strptime(_dict['due_date'], '%Y-%m-%d')
     _dict['completion_date'] = strptime(_dict['completion_date'], '%Y-%m-%d'),
+    return _dict
+
+
+def gen_total(_dict: dict) -> dict:
+    """ Tallys the project total from line_items """
+    total = Decimal('0')
+    for item in _dict['line_items']:
+        total += (Decimal(str(item['price'])) *
+                  Decimal(str(item['quantity'])))
+    _dict['total'] = total
     return _dict
 
 

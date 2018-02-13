@@ -159,6 +159,7 @@ class Project(db.Model):
                 "status": self.status,
                 "deposit": str(self.deposit),
                 "discount": str(self.discount),
+                "total": str(self.total),
                 "line_items": self.get_lineitems()
                }
 
