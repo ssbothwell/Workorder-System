@@ -28,10 +28,15 @@ def new_project():
         p_dict = project_schema.validate(request.get_json())
         p_dict = gen_datetimes(p_dict)
         line_items = p_dict.pop('line_items', None)
-    except KeyError:
+    except:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
-    # Must ensure client_id is for a real client
+    try:
+        _ = Client.query.filter(Client.id == p_dict['client_id']).one()
+    except:
+        return jsonify({'msg': 'No Such User'}), 400
+
+
     project = Project(**p_dict)
     db.session.add(project)
     create_lineitems(project, line_items)
@@ -71,14 +76,19 @@ def delete_project(project_id):
 @app.route('/projects/<int:project_id>/update', methods=['POST'])
 def update_project(project_id):
     """ Updates all fields on a project with request """
-    project = Project.query.filter(Project.id == project_id).one_or_none()
-
     try:
         p_dict = project_schema.validate(request.get_json())
         line_items = validated.pop('line_items', None)
-    except KeyError:
+    except:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
+    try:
+        _ = Client.query.filter(Client.id == p_dict['client_id']).one()
+    except:
+        return jsonify({'msg': 'No Such User'}), 400
+
+    project = Project.query.filter(Project.id == 
+                                   project_id).one_or_none()
     if project:
         # Convert dates to datetime objects
         p_dict['due_date'] = datetime.strptime(p_dict['due_date'], 
