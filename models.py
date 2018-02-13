@@ -127,6 +127,7 @@ class Project(db.Model):
     status = db.Column(db.Integer, default=0)
     deposit = db.Column(db.Numeric, default=0)
     discount = db.Column(db.Numeric, default=0.0)
+    total = db.Column(db.Numeric, default=0.0)
     
     strainer_bars = db.relationship('Strainer_Bar') 
     panels = db.relationship('Panel') 
@@ -136,7 +137,7 @@ class Project(db.Model):
 
     def __init__(self, client_id, due_date, 
                  completion_date, project_title,
-                 status, deposit, discount):
+                 status, deposit, discount, total):
         self.client_id = client_id
         self.due_date = due_date
         self.completion_date = completion_date
@@ -144,6 +145,7 @@ class Project(db.Model):
         self.status = status
         self.deposit = deposit
         self.discount = discount
+        self.total = total
 
 
     def get_dict(self) -> dict:
