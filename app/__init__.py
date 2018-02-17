@@ -6,12 +6,16 @@ ssbothwell@gmail.com
 import os
 import config
 from flask import Flask
-from app.models import db
+from flask_sqlalchemy import SQLAlchemy
+
+# SQLAlchemy Instance
+db = SQLAlchemy()
 
 # Component Imports
 import app.models
 import app.validators
 from app.controllers import controllers
+
 
 
 def create_app(database_config):

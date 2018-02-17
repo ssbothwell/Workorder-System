@@ -1,10 +1,7 @@
 """
 SQLAlchemy ORM Models
 """
-from flask_sqlalchemy import SQLAlchemy
-
-# SQLAlchemy Instance
-db = SQLAlchemy()
+from app import db
 
 class Custom_Project(db.Model):
     __tablename__ = 'custom_projects'

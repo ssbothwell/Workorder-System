@@ -4,7 +4,8 @@ Fabco Work Order System Controllers
 from datetime import datetime
 from decimal import Decimal
 from flask import request, jsonify, Blueprint
-from app import validators
+from app import validators as v
+from app import db
 from app.models import (Project, Client, Strainer_Bar,
                         Panel, Pedestal, Custom_Project)
 
@@ -15,7 +16,7 @@ controllers = Blueprint("controller", __name__)
 def new_project():
     """ Add a project to a database """
     try:
-        p_dict = project_schema.validate(request.get_json())
+        p_dict = v.project_schema.validate(request.get_json())
         p_dict = gen_datetimes(p_dict)
         p_dict = gen_total(p_dict)
         line_items = p_dict.pop('line_items', None)
@@ -68,7 +69,7 @@ def delete_project(project_id):
 def update_project(project_id):
     """ Updates all fields on a project with request """
     try:
-        p_dict = project_schema.validate(request.get_json())
+        p_dict = v.project_schema.validate(request.get_json())
         p_dict = gen_total(p_dict)
         p_dict = gen_datetimes(p_dict)
         line_items = validated.pop('line_items', None)
@@ -141,7 +142,7 @@ def get_client_projects(client_id):
 def new_client():
     """ Add a client to a database """
     try:
-        validated = client_schema.validate(request.get_json())
+        validated = v.client_schema.validate(request.get_json())
     except KeyError:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
@@ -175,7 +176,7 @@ def delete_client(client_id):
 def update_client(client_id):
     """ Update a client's details """
     try:
-        validated = client_schema.validate(request.get_json())
+        validated = v.client_schema.validate(request.get_json())
     except KeyError:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 
