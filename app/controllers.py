@@ -72,7 +72,7 @@ def update_project(project_id):
         p_dict = v.project_schema.validate(request.get_json())
         p_dict = gen_total(p_dict)
         p_dict = gen_datetimes(p_dict)
-        line_items = validated.pop('line_items', None)
+        line_items = p_dict.pop('line_items', None)
     except:
         return jsonify({'msg': 'Incorrect JSON Schema'}), 400
 

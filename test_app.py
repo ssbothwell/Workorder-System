@@ -7,6 +7,7 @@ import json
 import config
 from flask.wrappers import Response
 from app import create_app, db
+from app.models import Custom_Project, Project, Client
 
 
 class TestProjectControllers(unittest.TestCase):
@@ -80,7 +81,7 @@ class TestProjectControllers(unittest.TestCase):
         return response
 
 
-    def delete_client(self, ident: int) -> Response:
+    def delete_project(self, ident: int) -> Response:
         """
         Helper Function for deleting projects from database
         """
@@ -90,7 +91,7 @@ class TestProjectControllers(unittest.TestCase):
         return response
 
 
-    def update_client(self, ident: int, mock_json: dict) -> Response:
+    def update_project(self, ident: int, mock_json: dict) -> Response:
         """
         Helper Function for updating projects in database
         """
@@ -137,33 +138,53 @@ class TestProjectControllers(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-    #def testGetClient(self) -> None:
-    #    """
-    #    Get a client
-    #    """
-    #    response = self.get_client(1)
-    #    self.assertEqual(response.status_code, 200)
+    def testGetClient(self) -> None:
+        """
+        Get a client
+        """
+        response = self.get_project(1)
+        self.assertEqual(response.status_code, 200)
 
 
-    #def testDeleteClient(self) -> None:
-    #    """
-    #    Delete a client
-    #    """
-    #    response = self.delete_client(1)
-    #    self.assertEqual(response.status_code, 200)
+    def testDeleteClient(self) -> None:
+        """
+        Delete a client
+        """
+        response = self.delete_project(1)
+        self.assertEqual(response.status_code, 200)
 
 
-    #def testUpdateClient(self) -> None:
-    #    """
-    #    Update a client
-    #    """
-    #    mock_json = {'first_name': 'foo',
-    #                 'last_name': 'bar',
-    #                 'email': 'foo@bar',
-    #                 'phone': '1234567890',
-    #                }
-    #    response = self.update_client(1, mock_json)
-    #    self.assertEqual(response.status_code, 200)
+    def testUpdateProject(self) -> None:
+        """
+        Update a project
+        """
+        mock_json = {"client_id": 1,
+                     "due_date": "2018-01-01",
+                     "completion_date": "2018-02-01",
+                     "project_title": "a test project",
+                     "status": 0,
+                     "deposit": 5000,
+                     "discount": 0,
+                     "line_items": [{"price": 100,
+                                     "quantity":2,
+                                     "total": 200,
+                                     "p_type": "custom_project",
+                                     "notes": ""
+                                    },
+                                    {"price": 150,
+                                     "quantity": 3,
+                                     "total": 450,
+                                     "width": 48,
+                                     "height": 72,
+                                     "thickness": 1,
+                                     "p_type": "panel",
+                                     "notes": ""
+                                    }
+                                    ]
+                    }
+
+        response = self.update_project(1, mock_json)
+        self.assertEqual(response.status_code, 200)
 
 
 class TestClientControllers(unittest.TestCase):

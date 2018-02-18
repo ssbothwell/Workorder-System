@@ -126,10 +126,14 @@ class Project(db.Model):
     discount = db.Column(db.Numeric, default=0.0)
     total = db.Column(db.Numeric, default=0.0)
     
-    strainer_bars = db.relationship('Strainer_Bar') 
-    panels = db.relationship('Panel') 
-    pedestals = db.relationship('Pedestal') 
-    custom_projects = db.relationship('Custom_Project')
+    strainer_bars = db.relationship('Strainer_Bar',
+                                    cascade='all,delete') 
+    panels = db.relationship('Panel',
+                             cascade='all,delete') 
+    pedestals = db.relationship('Pedestal',
+                                cascade='all,delete') 
+    custom_projects = db.relationship('Custom_Project',
+                                      cascade='all,delete') 
 
 
     def __init__(self, client_id, due_date, 
