@@ -17,7 +17,6 @@ import app.validators
 from app.controllers import controllers
 
 
-
 def create_app(database_config):
     # Generate Flask instance
     app = Flask(__name__)
@@ -26,6 +25,7 @@ def create_app(database_config):
     app.config.from_object(database_config)
     # Create SQLAlchemy instance
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
     db.init_app(app)
 
     # Register blueprints

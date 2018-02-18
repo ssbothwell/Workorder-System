@@ -1,7 +1,7 @@
 """
 Validation Helpers
 """
-from schema import Schema, And, Or
+from schema import Schema, And, Or, Optional
 
 # JSON Request schemas
 client_schema = Schema(And({'first_name': str,
@@ -11,10 +11,10 @@ client_schema = Schema(And({'first_name': str,
                            }))
 
 
-strainer_schema = Schema(And({'project_id': int,
+strainer_schema = Schema(And({Optional('project_id'): int,
                               'width': int,
                               'height': int,
-                              'thickness': int,
+                              'thickness': float,
                               'price': int,
                               'quantity': int,
                               'total': int,
@@ -23,7 +23,7 @@ strainer_schema = Schema(And({'project_id': int,
                              }))
 
 
-panel_schema = Schema(And({'project_id': int,
+panel_schema = Schema(And({Optional('project_id'): int,
                            'width': int,
                            'height': int,
                            'thickness': int,
@@ -35,7 +35,7 @@ panel_schema = Schema(And({'project_id': int,
                           }))
 
 
-pedestal_schema = Schema(And({'project_id': int,
+pedestal_schema = Schema(And({Optional('project_id'): int,
                               'width': int,
                               'height': int,
                               'depth': int,
@@ -47,7 +47,8 @@ pedestal_schema = Schema(And({'project_id': int,
                              }))
 
 
-custom_project_schema = Schema(And({'price': int,
+custom_project_schema = Schema(And({Optional('project_id'): int,
+                                    'price': int,
                                     'quantity': int,
                                     'total': int,
                                     'notes': str,

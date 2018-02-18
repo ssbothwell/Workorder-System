@@ -246,7 +246,7 @@ def create_lineitems(project, line_items) -> None:
                 notes=item['notes'])
 
         if item['p_type'] == 'custom_project':
-            item = Custom_Project(
+            model = Custom_Project(
                 project_id=project.id,
                 p_type=item['p_type'],
                 price=item['price'],
@@ -254,7 +254,7 @@ def create_lineitems(project, line_items) -> None:
                 total=item['total'],
                 notes=item['notes'])
 
-        db.session.add(item)
+        db.session.add(model)
     return
 
 
